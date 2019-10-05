@@ -19,11 +19,11 @@ class ControllerState:
         self.dpad_left = 0
         self.dpad_right = 0
 
-        self.ls_up = 0.0
-        self.ls_down = 0.0
+        self.ls_x = 0.0
+        self.ls_y = 0.0
 
-        self.rs_up = 0.0
-        self.rs_down = 0.0
+        self.rs_x = 0.0
+        self.rs_y = 0.0
 
         self.start = 0
         self.back = 0

@@ -22,6 +22,25 @@ def unpack_button(button_val, button):
     elif(button == b'\x03'):
         controller_state.x = button_val
 
+def get_norm_axis_val(axis_val):
+    return axis_val / 32767.0
+
+def unpack_axis(axis_val, axis):
+    if axis == b'\x04':
+        controller_state.lt = get_norm_axis_val(axis_val)
+    elif axis == b'\x05':
+        controller_state.rt = get_norm_axis_val(axis_val)
+    elif axis == b'\x00':
+        controller_state.ls_x = get_norm_axis_val(axis_val)
+    elif axis == b'\x01':
+        controller_state.ls_y = get_norm_axis_val(axis_val)
+    elif axis == b'\x02':
+        controller_state.rs_x = get_norm_axis_val(axis_val)
+    elif axis == b'\x03':
+        controller_state.rs_y = get_norm_axis_val(axis_val)
+        
+    
+    pass
 
 while True:
     evnt_str = os.read(dev, JS_EVENT_SIZE)
@@ -31,11 +50,7 @@ while True:
     if(event[2] == b'\x01'):
         unpack_button(event[1], event[3])
         # pprint(vars(controller_state))
-        print(event)
     elif(event[2] == b'\x02'):
-        unpack_button(event[1], event[3])
-        # pprint(vars(controller_state))
-        print(event)
-    else:
-        print(event)
+        unpack_axis(event[1], event[3])
+        pprint(vars(controller_state))
 
