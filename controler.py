@@ -58,12 +58,21 @@ def start_js_listner():
 
         if(event[2] == b'\x01'):
             unpack_button(event[1], event[3])
-            # pprint(vars(controller_state))
+            pprint(vars(controller_state))
         elif(event[2] == b'\x02'):
             unpack_axis(event[1], event[3])
             pprint(vars(controller_state))
 
+
+def start_js_poller():
+    while True:
+        lock.acquire()
+        pprint(vars(controller_state))
+        lock.release()
+        sleep(1.0 / 60.0)
+
 start_new_thread(start_js_listner, ())
+start_new_thread(start_js_poller, ())
 
 c = raw_input("Type something to quit.")
 os.close(dev)
