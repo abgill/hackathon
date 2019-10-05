@@ -75,17 +75,33 @@ def start_js_poller():
         pprint(vars(controller_state))
         if controller_state.lt > 0:
             motor.forward(controller_state.lt)
+        elif controller_state.rt > 0:
+            motor.backward(controller_state.rt)
         else:
             motor.stop()
+
+        # servo_angle = (1 + controller_state.ls_x) / 2
+        # servo_angle *= 180
+        # kit.servo[0].angle = servo_angle
+        # kit.servo[4].angle = servo_angle
+        if controller_state.a == 1:
+            kit.servo[0].angle = 20
+            kit.servo[4].angle = 20
+        elif controller_state.b == 1:
+            kit.servo[0].angle = 120
+            kit.servo[4].angle = 120
+
         lock.release()
         sleep(1.0 / 60.0)
 
-threading.Thread(target=start_js_listner).start()
-threading.Thread(target=start_js_poller).start()
+
+t1 = threading.Thread(target=start_js_listner).start()
+t2 = threading.Thread(target=start_js_poller).start()
 
 
 
 
 c = raw_input("Type something to quit.")
+
 os.close(dev)
 
