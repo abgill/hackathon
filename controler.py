@@ -2,7 +2,9 @@ import os
 import struct
 from ControllerState import ControllerState
 from time import sleep
-from thread import start_new_thread
+
+from gpiozero import Motor
+from adafruit_servokit import ServoKit
 import threading
 
 from pprint import pprint
@@ -65,14 +67,24 @@ def start_js_listner():
 
 
 def start_js_poller():
+    motor = Motor(17, 18)
+    kit = ServoKit(channels=16)
+    kit.servo[0].angle = 180
     while True:
         lock.acquire()
         pprint(vars(controller_state))
+        if controller_state.lt > 0:
+            motor.forward(controller_state.lt)
+        else:
+            motor.stop()
         lock.release()
         sleep(1.0 / 60.0)
 
-start_new_thread(start_js_listner, ())
-start_new_thread(start_js_poller, ())
+threading.Thread(target=start_js_listner).start()
+threading.Thread(target=start_js_poller).start()
+
+
+
 
 c = raw_input("Type something to quit.")
 os.close(dev)
