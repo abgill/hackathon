@@ -82,13 +82,15 @@ def start_js_poller():
     motor3 = Motor(23, 24)
     motor4 = Motor(6, 12)
     kit = ServoKit(channels=16)
-    # kit.servo[0].angle = 0
-    # kit.servo[4].angle = 0
+    kit.servo[0].angle = 90
+    kit.servo[4].angle = 90
    
+    left_angle = 90
+    # right_angle = 90
 
     while True:
         lock.acquire()
-        pprint(vars(controller_state))
+        # pprint(vars(controller_state))
         if controller_state.ls_y > 0:
             motor1.forward(controller_state.ls_y)
         elif controller_state.ls_y < 0:
@@ -119,25 +121,39 @@ def start_js_poller():
 
         
 
+        if controller_state.a > 0:
+            kit.servo[0].angle = 180
+            kit.servo[4].angle = 0
+        if controller_state.b > 0:
+            kit.servo[0].angle = 0
+            kit.servo[4].angle = 180
+
         if(controller_state.rt > -.8):
-            angle = ((controller_state.rt + 1) / 2 ) + kit.servo[4].angle
-            if angle > 180:
-                angle = 180
-            elif angle < 0:
-                angle = 0
+            print(controller_state.rt)
+            left_angle = ((controller_state.rt + 1) / 2 ) + left_angle
+            if left_angle > 180:
+                left_angle = 180
+            elif left_angle < 0:
+                left_angle = 0
             
-            kit.servo[4].angle = angle
+            kit.servo[0].angle = left_angle
+            kit.servo[4].angle = 180 - left_angle
 
-        if(controller_state.lt > -.8):
+        if(controller_state.lt > 0):
 
-            angle =  kit.servo[4].angle - ((controller_state.lt + 1) / 2 ) 
-            if angle > 180:
-                angle = 180
-            elif angle < 0:
-                angle = 0
+            print(controller_state.lt)
+            left_angle = left_angle - ((controller_state.lt + 1) / 2 )
+            if left_angle > 180:
+                left_angle = 180
+            elif left_angle < 0:
+                left_angle = 0
+            
+            kit.servo[0].angle = left_angle
+            kit.servo[4].angle = 180 - left_angle
 
-            # kit.servo[0].angle -= (controller_state.lt + 1) / 2  * 180
-            kit.servo[4].angle = angle 
+        # print("s0 ", kit.servo[0].angle,"\ns4 ", kit.servo[4].angle)
+        # kit.servo[0].angle = 90
+        # kit.servo[4].angle = 90
 
 
         lock.release()
