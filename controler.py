@@ -81,7 +81,7 @@ def start_js_poller():
     motor2 = Motor(27, 22)
     motor3 = Motor(23, 24)
     motor4 = Motor(6, 12)
-    # kit = ServoKit(channels=16)
+    kit = ServoKit(channels=16)
     # kit.servo[0].angle = 0
     # kit.servo[4].angle = 0
    
@@ -117,12 +117,27 @@ def start_js_poller():
         else:
             motor4.stop()
 
-        # if(controller_state.lt > -.8):
-        #     kit.servo[0].angle += (controller_state.lt + 1) / 2  * 180
-        #     kit.servo[4].angle += (controller_state.lt + 1) / 2 * 180
-        # if(controller_state.rt > -.8):
-        #     kit.servo[0].angle -= (controller_state.lt + 1) / 2  * 180
-        #     kit.servo[4].angle -= (controller_state.lt + 1) / 2 * 180
+        
+
+        if(controller_state.rt > -.8):
+            angle = ((controller_state.rt + 1) / 2 ) + kit.servo[4].angle
+            if angle > 180:
+                angle = 180
+            elif angle < 0:
+                angle = 0
+            
+            kit.servo[4].angle = angle
+
+        if(controller_state.lt > -.8):
+
+            angle =  kit.servo[4].angle - ((controller_state.lt + 1) / 2 ) 
+            if angle > 180:
+                angle = 180
+            elif angle < 0:
+                angle = 0
+
+            # kit.servo[0].angle -= (controller_state.lt + 1) / 2  * 180
+            kit.servo[4].angle = angle 
 
 
         lock.release()
