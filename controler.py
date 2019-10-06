@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import struct
 from ControllerState import ControllerState
@@ -11,8 +13,16 @@ from pprint import pprint
 
 JS_EVENT_SIZE = 8
 
-dev = os.open("/dev/input/js0", os.O_RDONLY)
-print(dev)
+js_disconnected = True
+
+while js_disconnected:
+    try:
+        dev = os.open("/dev/input/js0", os.O_RDONLY)
+        js_disconnected = False
+        print("Connected")
+    except:
+        sleep(3)
+
 
 controller_state = ControllerState()
 lock = threading.Lock()
@@ -60,36 +70,60 @@ def start_js_listner():
 
         if(event[2] == b'\x01'):
             unpack_button(event[1], event[3])
-            pprint(vars(controller_state))
+            # pprint(vars(controller_state))
         elif(event[2] == b'\x02'):
             unpack_axis(event[1], event[3])
-            pprint(vars(controller_state))
+            # pprint(vars(controller_state))
 
 
 def start_js_poller():
-    motor = Motor(17, 18)
-    kit = ServoKit(channels=16)
-    kit.servo[0].angle = 180
+    motor1 = Motor(17, 18)
+    motor2 = Motor(27, 22)
+    motor3 = Motor(23, 24)
+    motor4 = Motor(6, 12)
+    # kit = ServoKit(channels=16)
+    # kit.servo[0].angle = 0
+    # kit.servo[4].angle = 0
+   
+
     while True:
         lock.acquire()
         pprint(vars(controller_state))
-        if controller_state.lt > 0:
-            motor.forward(controller_state.lt)
-        elif controller_state.rt > 0:
-            motor.backward(controller_state.rt)
+        if controller_state.ls_y > 0:
+            motor1.forward(controller_state.ls_y)
+        elif controller_state.ls_y < 0:
+            motor1.backward(-controller_state.ls_y)
         else:
-            motor.stop()
+            motor1.stop()
 
-        # servo_angle = (1 + controller_state.ls_x) / 2
-        # servo_angle *= 180
-        # kit.servo[0].angle = servo_angle
-        # kit.servo[4].angle = servo_angle
-        if controller_state.a == 1:
-            kit.servo[0].angle = 20
-            kit.servo[4].angle = 20
-        elif controller_state.b == 1:
-            kit.servo[0].angle = 120
-            kit.servo[4].angle = 120
+        if controller_state.rs_y > 0:
+            motor2.forward(controller_state.rs_y)
+        elif controller_state.rs_y < 0:
+            motor2.backward(-controller_state.rs_y)
+        else:
+            motor2.stop()
+
+        if controller_state.rs_x > 0:
+            motor3.forward(controller_state.rs_x)
+        elif controller_state.rs_x < 0:
+            motor3.backward(-controller_state.rs_x)
+        else:
+            motor3.stop()
+
+        if controller_state.ls_x > 0:
+            motor4.forward(controller_state.ls_x)
+        elif controller_state.ls_x < 0:
+            motor4.backward(-controller_state.ls_x)
+        else:
+            motor4.stop()
+
+        # if(controller_state.lt > -.8):
+        #     kit.servo[0].angle += (controller_state.lt + 1) / 2  * 180
+        #     kit.servo[4].angle += (controller_state.lt + 1) / 2 * 180
+        # if(controller_state.rt > -.8):
+        #     kit.servo[0].angle -= (controller_state.lt + 1) / 2  * 180
+        #     kit.servo[4].angle -= (controller_state.lt + 1) / 2 * 180
+
 
         lock.release()
         sleep(1.0 / 60.0)
@@ -99,9 +133,4 @@ t1 = threading.Thread(target=start_js_listner).start()
 t2 = threading.Thread(target=start_js_poller).start()
 
 
-
-
-c = raw_input("Type something to quit.")
-
-os.close(dev)
 
